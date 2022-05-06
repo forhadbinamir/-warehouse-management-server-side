@@ -20,10 +20,10 @@ async function run() {
 
         // show single email user data by using this api
         app.get('/person', async (req, res) => {
-            const email = req.query
+            const email = req.query.email
             console.log(email)
             const query = { email: email }
-            const cursor = databaseCollection.find(query)
+            const cursor = usersCollection.find(query)
             const result = await cursor.toArray()
             res.send(result)
         })
