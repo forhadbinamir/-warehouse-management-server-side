@@ -18,13 +18,19 @@ async function run() {
         const databaseCollection = client.db('electronics-warehouse').collection('suppliers')
         const usersCollection = client.db('electronics-warehouse').collection('person')
 
-        // show data only single email user by using this api
-        app.get('person', async (req, res) => {
+        // show single email user data by using this api
+        app.get('/person', async (req, res) => {
             const email = req.query
             console.log(email)
             const query = { email: email }
             const cursor = databaseCollection.find(query)
             const result = await cursor.toArray()
+            res.send(result)
+        })
+        // person collection api
+        app.post('/person', async (req, res) => {
+            const person = req.body
+            const result = await usersCollection.insertOne(person)
             res.send(result)
         })
         // find a single supplier from the server using this api
