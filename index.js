@@ -16,6 +16,24 @@ async function run() {
     try {
         await client.connect()
         const databaseCollection = client.db('electronics-warehouse').collection('suppliers')
+        const usersCollection = client.db('electronics-warehouse').collection('person')
+
+        // show data only single email user by using this api
+        app.get('person', async (req, res) => {
+            const email = req.query
+            console.log(email)
+            const query = { email: email }
+            const cursor = databaseCollection.find(query)
+            const result = await cursor.toArray()
+            res.send(result)
+        })
+        // find a single supplier from the server using this api
+        app.get('/suppliers/:supplierId', async (req, res) => {
+            const id = req.params.supplierId;
+            const query = { _id: ObjectId(id) }
+            const result = await databaseCollection.findOne(query)
+            res.send(result)
+        })
         // show all supplier in the ui by using thi api
         app.get('/suppliers', async (req, res) => {
             const query = {}
@@ -32,6 +50,7 @@ async function run() {
             res.send(result)
         })
 
+        // get data client site to database using this api
         app.post('/suppliers', async (req, res) => {
             const newSupplier = req.body
             console.log('data add hoisa', newSupplier)
@@ -52,10 +71,7 @@ async function run() {
                     price: updateSupplier.price,
                     image: updateSupplier.image,
                     description: updateSupplier.description
-
-
                 }
-
             }
             const result = await databaseCollection.updateOne(filter, updateDoc, options)
             res.send(result)
