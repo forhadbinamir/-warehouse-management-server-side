@@ -1,5 +1,6 @@
 const express = require('express');
 const cors = require('cors');
+const jwt = require('jsonwebtoken');
 const app = express()
 const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 const port = process.env.PORT || 5000
@@ -18,6 +19,14 @@ async function run() {
         const databaseCollection = client.db('electronics-warehouse').collection('suppliers')
         const usersCollection = client.db('electronics-warehouse').collection('person')
 
+        // implement jwt token 
+        app.post('/login', async (req, res) => {
+            const user = req.body
+            const accessToken = jwt.sign(user, process.env.ACCESS_TOKEN_SECRET, {
+                expiresIn: '1d'
+            });
+            res.send({ accessToken })
+        })
         // show single email user data by using this api
         app.get('/person', async (req, res) => {
             const email = req.query.email
