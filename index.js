@@ -9,6 +9,22 @@ require('dotenv').config()
 app.use(cors())
 app.use(express.json())
 
+//jwt access token 
+function jwtVerify(req, res, next) {
+    const authHeaders = req.headers.authorization
+    if (!authHeaders) {
+        return res.status(401).send({ message: 'unauthorized access' })
+    }
+    const token = authHeaders.split(' ')[1]
+    jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, (error, decoded) => {
+        if (error) {
+            return res.status(403).send({ message: 'Forbidden Access' })
+        }
+        console.log('decoded', decoded)
+        req.decoded = decoded
+        next()
+    })
+}
 
 const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster0.qdnhf.mongodb.net/myFirstDatabase?retryWrites=true&w=majority`;
 const client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology: true, serverApi: ServerApiVersion.v1 });
@@ -28,13 +44,16 @@ async function run() {
             res.send({ accessToken })
         })
         // show single email user data by using this api
-        app.get('/person', async (req, res) => {
+        app.get('/person', jwtVerify, async (req, res) => {
+            const decodedEmail = req.decoded.email
             const email = req.query.email
-            console.log(email)
-            const query = { email: email }
-            const cursor = usersCollection.find(query)
-            const result = await cursor.toArray()
-            res.send(result)
+            if (email === decodedEmail) {
+                const query = { email: email }
+                const cursor = usersCollection.find(query)
+                const result = await cursor.toArray()
+                res.send(result)
+            }
+
         })
         // person collection api
         app.post('/person', async (req, res) => {
