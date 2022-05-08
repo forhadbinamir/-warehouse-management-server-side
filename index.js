@@ -91,6 +91,20 @@ async function run() {
             const result = await databaseCollection.insertOne(newSupplier);
             res.send(result)
         })
+        app.put('/update/:id', async (req, res) => {
+            const id = req.params.id
+            const updateQuantity = req.body;
+            console.log(updateQuantity)
+            const filter = { _id: ObjectId(id) }
+            const options = { upsert: true }
+            const updateDoc = {
+                $set: {
+                    quantity: updateQuantity.quantity
+                }
+            }
+            const result = await databaseCollection.updateOne(filter, updateDoc, options)
+            res.send(result)
+        })
         // update supplier 
         app.put('/update/:id', async (req, res) => {
             const id = req.params.id;
